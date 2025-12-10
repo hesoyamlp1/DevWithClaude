@@ -1,0 +1,50 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(/Users/linsuki/Passion/WebRPGWithLLM/**/*.java)",
+      "Edit(/Users/linsuki/Passion/WebRPGWithLLM/**/*.ts)",
+      "Edit(/Users/linsuki/Passion/WebRPGWithLLM/**/*.tsx)",
+      "Edit(/Users/linsuki/Passion/WebRPGWithLLM/**/*.json)",
+      "Edit(/Users/linsuki/Passion/WebRPGWithLLM/**/*.xml)",
+      "Edit(/Users/linsuki/Passion/WebRPGWithLLM/**/*.sql)",
+      "Edit(/Users/linsuki/Passion/WebRPGWithLLM/**/*.md)",
+      "Edit(/Users/linsuki/Passion/WebRPGWithLLM/**/*.css)",
+      "Edit(/Users/linsuki/Passion/WebRPGWithLLM/**/*.yml)",
+      "Edit(/Users/linsuki/Passion/WebRPGWithLLM/**/*.yaml)",
+      "Edit(/Users/linsuki/Passion/WebRPGWithLLM/**/*.properties)",
+      "Write(/Users/linsuki/Passion/WebRPGWithLLM/**)",
+      "Bash(mvn:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git stash:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(mkdir:*)",
+      "Bash(rm:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(tree:*)",
+      "Bash(find:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(git -c:*)",
+      "Bash(git -C:*)",
+      "mcp__ide__update"
+    ],
+    "ask": [
+      "Bash(sqlite3:*)"
+    ],
+    "deny": [
+      "Bash(git push:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(rm -rf /:*)"
+    ]
+  }
+}

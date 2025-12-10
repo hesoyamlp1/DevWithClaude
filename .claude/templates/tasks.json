@@ -1,0 +1,43 @@
+{
+  "active": [
+    {
+      "id": "T001",
+      "name": "示例任务",
+      "status": "pending",
+      "what": "简要描述要做什么",
+      "boundary": [
+        "不做什么",
+        "边界条件"
+      ],
+      "constraints": [
+        "必须遵守的约束",
+        "技术限制"
+      ],
+      "done_when": [
+        "完成标准1",
+        "完成标准2"
+      ],
+      "depends_on": []
+    }
+  ],
+  "archived": [
+    {
+      "id": "T000",
+      "name": "归档任务示例",
+      "completed_at": "2025-12-10",
+      "output": {
+        "summary": "一句话总结做了什么",
+        "models": [
+          "actor 表: id, name, description"
+        ],
+        "apis": [
+          "GET /api/actors - 列表",
+          "POST /api/actors - 创建"
+        ],
+        "utils": [
+          "ActorService.copyActor(id)"
+        ]
+      }
+    }
+  ]
+}
