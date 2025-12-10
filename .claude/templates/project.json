@@ -1,0 +1,55 @@
+{
+  "project": {
+    "name": "示例项目",
+    "type": "web-app"
+  },
+
+  "stack": {
+    "backend": "java/spring-boot/maven",
+    "frontend": "typescript/react/vite",
+    "database": "mysql/flyway"
+  },
+
+  "conventions": {
+    "entity": "PascalCase",
+    "table": "snake_case",
+    "api_path": "/api/{resource}",
+    "component": "PascalCase"
+  },
+
+  "models": {
+    "Actor": {
+      "table": "actor",
+      "fields": ["id", "name", "description", "created_at"],
+      "source": "T001"
+    }
+  },
+
+  "apis": {
+    "/api/actors": {
+      "methods": ["GET", "POST", "PUT", "DELETE"],
+      "desc": "角色管理",
+      "source": "T001"
+    }
+  },
+
+  "utils": {
+    "ActorService.copyActor": {
+      "layer": "backend",
+      "desc": "复制角色及关联数据",
+      "source": "T001"
+    },
+    "useActorList": {
+      "layer": "frontend",
+      "desc": "获取角色列表 hook",
+      "source": "T003"
+    }
+  },
+
+  "components": {
+    "ActorCard": {
+      "desc": "角色卡片展示",
+      "source": "T003"
+    }
+  }
+}

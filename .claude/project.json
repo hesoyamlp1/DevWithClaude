@@ -1,0 +1,21 @@
+{
+  "project": {
+    "name": "",
+    "type": ""
+  },
+  "stack": {
+    "backend": "",
+    "frontend": "",
+    "database": ""
+  },
+  "conventions": {
+    "entity": "PascalCase",
+    "table": "snake_case",
+    "api_path": "/api/{resource}",
+    "component": "PascalCase"
+  },
+  "models": {},
+  "apis": {},
+  "utils": {},
+  "components": {}
+}
