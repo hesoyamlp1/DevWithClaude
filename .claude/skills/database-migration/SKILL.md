@@ -1,158 +1,100 @@
 ---
 name: database-migration
-description: 数据库迁移和 Flyway 版本管理技能。在创建数据库表、修改表结构、编写迁移脚本时自动调用。
-allowed-tools: Read, Grep, Glob, Edit, Write, Bash
+description: 数据库迁移技能。在创建表、修改表结构、编写迁移脚本时自动调用。强调版本控制和不可变原则。
 ---
 
 # 数据库迁移技能
 
-## Flyway 版本控制
+## 项目配置
 
-**所有数据库变更必须通过 Flyway 迁移脚本**
+<!-- BEGIN:DATABASE -->
+**数据库信息:**
 
-### 脚本位置
+- 类型: 待填充
+- 位置: 待填充
+<!-- END:DATABASE -->
 
-迁移脚本放在: `core/src/main/resources/db/migration/`
+<!-- BEGIN:MIGRATION -->
+**迁移工具:**
 
-### 命名规则
+- 工具: 待填充
+- 脚本位置: 待填充
+- 命名规则: 待填充
+<!-- END:MIGRATION -->
+
+---
+
+## 开发流程
 
 ```
-V<VERSION>__<DESCRIPTION>.sql
+1. 查阅项目配置 → 2. 查看现有表结构 → 3. 创建迁移脚本 → 4. 记录产出
 ```
 
-示例:
-- `V1__init_schema.sql`
-- `V2__add_player_table.sql`
-- `V3__add_session_status_column.sql`
+### 1. 查阅项目配置
 
-### 版本号规则
+阅读上方「项目配置」章节，了解数据库类型和迁移工具。
 
-- 版本号递增: V1, V2, V3...
-- **永远不要修改已执行的脚本**
-- 新增变更创建新版本文件
-
-## 创建新迁移的步骤
-
-1. **查看当前最新版本**
-```bash
-ls core/src/main/resources/db/migration/
-```
-
-2. **创建新的迁移文件**
-```sql
--- V<下一版本号>__<描述>.sql
--- 例如: V4__add_inventory_table.sql
-
-CREATE TABLE inventory (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    player_id INTEGER NOT NULL,
-    item_id INTEGER NOT NULL,
-    quantity INTEGER DEFAULT 1,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (player_id) REFERENCES player(id)
-);
-
-CREATE INDEX idx_inventory_player ON inventory(player_id);
-```
-
-## SQL 编写规范
-
-### 表结构规范
-
-```sql
-CREATE TABLE table_name (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    -- 业务字段
-    name TEXT NOT NULL,
-    status TEXT DEFAULT 'active',
-    -- 时间戳
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    -- 外键
-    FOREIGN KEY (parent_id) REFERENCES parent_table(id)
-);
-
--- 索引
-CREATE INDEX idx_table_name_field ON table_name(field);
-```
-
-### SQLite 注意事项
-
-- 使用 `INTEGER PRIMARY KEY AUTOINCREMENT` 自增主键
-- 使用 `TEXT` 而非 `VARCHAR`
-- 使用 `DATETIME` 存储时间
-- SQLite 不支持 `ALTER COLUMN`，需要重建表
-
-## 数据库访问
-
-### 数据库位置
-```
-data/webrpg.db
-```
-
-### 使用 sqlite3 工具访问
-```bash
-sqlite3 data/webrpg.db
-```
-
-### 常用查询
-```sql
--- 查看所有表
-.tables
-
--- 查看表结构
-.schema table_name
-
--- 查看 Flyway 版本历史
-SELECT * FROM flyway_schema_history;
-```
-
-## Java 代码规范
-
-### 禁止在 Java 中硬编码 SQL
-
-```java
-// 错误 - 硬编码 SQL
-String sql = "SELECT * FROM player WHERE id = ?";
-
-// 正确 - 使用 MyBatis Wrapper
-QueryWrapper<Player> wrapper = new QueryWrapper<>();
-wrapper.eq("id", playerId);
-Player player = playerMapper.selectOne(wrapper);
-```
-
-### 复杂查询使用 SQL 文件
-
-放在 `src/main/resources/sql/` 目录:
-- 命名规范: `模块名_操作.sql`
-- 例如: `player_find_by_status.sql`
-
-## 辅助脚本
-
-脚本位置：`.claude/skills/database-migration/scripts/migration_helper.py`
+### 2. 查看现有表结构
 
 ```bash
-# 查看当前 Flyway 版本和迁移历史
-python3 .claude/skills/database-migration/scripts/migration_helper.py version
+# 搜索已记录的 models
+project search <关键词>
 
-# 生成下一个迁移文件名
-python3 .claude/skills/database-migration/scripts/migration_helper.py next-name add_user_table
+# 查看现有迁移脚本
+Glob: "**/migration/**/*.sql"
+Glob: "**/db/**/*.sql"
 
-# 列出所有迁移文件
-python3 .claude/skills/database-migration/scripts/migration_helper.py list
-
-# 查看表结构
-python3 .claude/skills/database-migration/scripts/migration_helper.py schema player
-
-# 列出所有表
-python3 .claude/skills/database-migration/scripts/migration_helper.py tables
-
-# 检查迁移文件规范
-python3 .claude/skills/database-migration/scripts/migration_helper.py check
+# 阅读表结构
+Read: 相关迁移脚本
 ```
+
+### 3. 创建迁移脚本
+
+- 按照项目的命名规则创建新脚本
+- 版本号递增
+- 遵循项目现有的 SQL 风格
+
+### 4. 记录产出
+
+```bash
+task done T001 '{
+  "summary": "做了什么",
+  "models": ["表名: 字段说明"]
+}'
+```
+
+---
+
+## 通用原则
+
+### 版本控制
+
+| 原则 | 说明 |
+|-----|------|
+| 版本递增 | 新变更创建新版本，不修改旧版本 |
+| 不可变 | **永远不要修改已执行的迁移脚本** |
+| 可回滚 | 考虑如何回滚变更 |
+
+### SQL 规范
+
+- 表名、字段名使用 snake_case
+- 主键字段命名为 `id`
+- 时间字段：`created_at`, `updated_at`
+- 添加必要的索引
+- 添加外键约束（如果适用）
+
+### 安全原则
+
+- 不要在迁移脚本中硬编码敏感数据
+- 大表变更考虑锁表影响
+- 删除操作要谨慎
+
+---
 
 ## 禁止事项
 
 - **永远不要修改已执行的迁移脚本**
-- 不要在 Java 代码中硬编码 SQL
+- 不要跳过查看现有表结构
+- 不要假设数据库类型
+- 不要在 Java/TS 代码中硬编码 SQL
 - 不要直接操作生产数据库

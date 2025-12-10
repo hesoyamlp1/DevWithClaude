@@ -7,7 +7,23 @@
   "stack": {
     "backend": "java/spring-boot/maven",
     "frontend": "typescript/react/vite",
-    "database": "mysql/flyway"
+    "database": "sqlite/flyway"
+  },
+
+  "paths": {
+    "backend_root": "backend/src/main/java/com/example/app",
+    "backend_resources": "backend/src/main/resources",
+    "frontend_root": "frontend/src",
+    "migration_dir": "backend/src/main/resources/db/migration",
+    "database": "data/app.db"
+  },
+
+  "patterns": {
+    "dto_style": "record",
+    "exception_class": "BusinessException",
+    "state_management": "zustand",
+    "component_library": "mantine",
+    "log_style": "slf4j"
   },
 
   "conventions": {
@@ -18,38 +34,33 @@
   },
 
   "models": {
-    "Actor": {
-      "table": "actor",
-      "fields": ["id", "name", "description", "created_at"],
+    "User": {
+      "table": "user",
+      "fields": ["id", "name", "email", "created_at"],
       "source": "T001"
     }
   },
 
   "apis": {
-    "/api/actors": {
+    "/api/users": {
       "methods": ["GET", "POST", "PUT", "DELETE"],
-      "desc": "角色管理",
+      "desc": "用户管理",
       "source": "T001"
     }
   },
 
   "utils": {
-    "ActorService.copyActor": {
+    "UserService.validateEmail": {
       "layer": "backend",
-      "desc": "复制角色及关联数据",
+      "desc": "邮箱格式校验",
       "source": "T001"
-    },
-    "useActorList": {
-      "layer": "frontend",
-      "desc": "获取角色列表 hook",
-      "source": "T003"
     }
   },
 
   "components": {
-    "ActorCard": {
-      "desc": "角色卡片展示",
-      "source": "T003"
+    "UserCard": {
+      "desc": "用户信息卡片",
+      "source": "T002"
     }
   }
 }

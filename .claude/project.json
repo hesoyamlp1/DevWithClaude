@@ -3,17 +3,35 @@
     "name": "",
     "type": ""
   },
+
   "stack": {
     "backend": "",
     "frontend": "",
     "database": ""
   },
+
+  "paths": {
+    "backend_root": "",
+    "backend_resources": "",
+    "frontend_root": "",
+    "migration_dir": "",
+    "database": ""
+  },
+
+  "patterns": {
+    "dto_style": "",
+    "exception_class": "",
+    "state_management": "",
+    "component_library": ""
+  },
+
   "conventions": {
     "entity": "PascalCase",
     "table": "snake_case",
     "api_path": "/api/{resource}",
     "component": "PascalCase"
   },
+
   "models": {},
   "apis": {},
   "utils": {},

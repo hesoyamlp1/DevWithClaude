@@ -1,170 +1,102 @@
 ---
 name: frontend-dev
-description: 前端 React + TypeScript 开发技能。在进行页面组件、UI 开发、状态管理等前端任务时自动调用。遵循 UI 和逻辑分离原则。
-allowed-tools: Read, Grep, Glob, Edit, Write
+description: 前端开发技能。在进行前端页面、组件、状态管理等开发时自动调用。强调探索优先、遵循项目现有模式。
 ---
 
 # 前端开发技能
 
-## 开发前必读
+## 项目配置
 
-**在进行任何前端开发前，必须先阅读前端开发指南:**
-- 文件路径: `/Users/linsuki/Passion/WebRPGWithLLM/rpg-frontend/DEVELOPMENT_GUIDE.md`
+<!-- BEGIN:STACK -->
+**技术栈:** 待填充
+<!-- END:STACK -->
 
-## 技术栈
+<!-- BEGIN:STRUCTURE -->
+**目录结构:**
 
-- React + TypeScript
-- Mantine UI (组件库)
-- Zustand (状态管理)
-- React Router (路由)
-- Axios (HTTP 请求)
-- React Hook Form + Zod (表单验证)
+待填充
+<!-- END:STRUCTURE -->
 
-## 核心原则
+<!-- BEGIN:PATTERNS -->
+**代码模式:**
 
-### 1. UI 和逻辑分离
-- Mantine 组件负责 UI
-- 业务逻辑在 Hooks 或 Store 中
+- 组件库: 待填充
+- 状态管理: 待填充
+- 样式方案: 待填充
+- API 调用: 待填充
+<!-- END:PATTERNS -->
 
-### 2. 主题系统
-- 所有视觉配置在 `theme.ts`
-- 外观修改不触及组件代码
+---
 
-### 3. 状态管理
-- 全局状态用 Zustand
-- 组件内状态用 `useState`
-
-## 目录结构
+## 开发流程
 
 ```
-src/
-├── api/         # API 调用和 SSE (稳定)
-├── store/       # Zustand 全局状态 (稳定)
-├── types/       # TypeScript 类型 (稳定)
-├── pages/       # 页面组件 (易变)
-├── components/  # 可复用组件 (易变)
-├── theme.ts     # Mantine 主题配置
-└── App.tsx      # 路由配置
+1. 查阅项目配置 → 2. 搜索相关资产 → 3. 阅读相关代码 → 4. 遵循模式开发 → 5. 记录产出
 ```
 
-## 样式规范
+### 1. 查阅项目配置
 
-### 正确做法
-```typescript
-<Box p="md" bg="gray.0">
-    <Text c="blue" fw={500}>文本</Text>
-    <Button variant="outline" size="sm">按钮</Button>
-</Box>
-```
+阅读上方「项目配置」章节，了解技术栈和代码模式。
 
-### 禁止做法
-```typescript
-// 不要写内联样式
-<div style={{ padding: '16px' }}>
-
-// 不要写 CSS 文件
-import './MyComponent.css';
-```
-
-## 组件开发模板
-
-```typescript
-// pages/SomePage.tsx
-import { Stack, Title, Button } from '@mantine/core';
-import { useState } from 'react';
-import { useAppStore } from '@/store';
-import { client } from '@/api/client';
-
-export default function SomePage() {
-    // 1. 全局状态
-    const { sessionId, addEvent } = useAppStore();
-
-    // 2. 组件内部状态
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    // 3. 事件处理
-    const handleSubmit = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const res = await client.post('/api/endpoint', { data });
-            addEvent(res.data);
-        } catch (err) {
-            setError((err as Error).message);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // 4. 渲染
-    return (
-        <Stack>
-            <Title order={3}>页面标题</Title>
-            <Button onClick={handleSubmit} loading={isLoading}>
-                提交
-            </Button>
-        </Stack>
-    );
-}
-```
-
-## 状态管理 (Zustand)
-
-```typescript
-// store/index.ts
-import { create } from 'zustand';
-
-interface AppState {
-    sessionId: string | null;
-    setSessionId: (id: string) => void;
-}
-
-export const useAppStore = create<AppState>((set) => ({
-    sessionId: null,
-    setSessionId: (id) => set({ sessionId: id }),
-}));
-```
-
-## API 调用
-
-```typescript
-import { client } from '@/api/client';
-
-// 使用 client 实例，不直接用 axios
-const res = await client.get<ResponseType>('/endpoint');
-```
-
-## 辅助脚本
-
-脚本位置：`.claude/skills/frontend-dev/scripts/frontend_helper.py`
+### 2. 搜索相关资产
 
 ```bash
-# 检查组件规范 (内联样式、CSS导入、状态管理等)
-python3 .claude/skills/frontend-dev/scripts/frontend_helper.py check-component SessionChat.tsx
-
-# 查找内联样式
-python3 .claude/skills/frontend-dev/scripts/frontend_helper.py find-inline-styles
-
-# 查找 CSS 文件导入
-python3 .claude/skills/frontend-dev/scripts/frontend_helper.py find-css-imports
-
-# 列出所有页面组件
-python3 .claude/skills/frontend-dev/scripts/frontend_helper.py list-pages
-
-# 列出所有可复用组件
-python3 .claude/skills/frontend-dev/scripts/frontend_helper.py list-components
-
-# 显示前端目录结构
-python3 .claude/skills/frontend-dev/scripts/frontend_helper.py show-structure
-
-# 检查状态管理使用情况
-python3 .claude/skills/frontend-dev/scripts/frontend_helper.py check-store-usage
+project search <关键词>    # 查找已记录的 components/hooks/utils
 ```
+
+### 3. 阅读相关代码
+
+**资产记录不能替代阅读代码。** 找到相关文件后必须阅读理解：
+
+- 用 Glob 查找相似组件
+- 用 Read 阅读具体实现
+- 复杂情况调用 Explore subagent
+
+### 4. 遵循模式开发
+
+按照探索发现的模式编写代码，保持风格一致。
+
+### 5. 记录产出
+
+```bash
+task done T001 '{
+  "summary": "做了什么",
+  "components": ["组件名: 功能说明"],
+  "utils": ["hook名/函数名: 功能说明"]
+}'
+```
+
+---
+
+## 通用原则
+
+### 组件化
+
+| 原则 | 实践 |
+|-----|------|
+| 单一职责 | 一个组件只做一件事 |
+| 可复用性 | 通用组件通过 props 配置，不耦合业务 |
+| 组合优于继承 | 用组合构建复杂 UI |
+
+### 状态管理
+
+- 局部状态：组件内部使用
+- 全局状态：跨组件共享的数据
+- 服务端状态：API 返回的数据
+
+### 代码质量
+
+- 类型安全：使用 TypeScript 类型
+- 处理边界：loading、error、empty 状态
+- 清晰命名：组件名、props 要自解释
+
+---
 
 ## 禁止事项
 
-- 不要在组件中直接写复杂逻辑
-- 不要写 CSS 文件或内联样式
-- 可复用组件不要直接访问全局状态 (通过 props 传递)
-- 不要主动编写文档 - 除非用户明确要求
+- 不要跳过阅读代码直接开发
+- 不要假设使用什么组件库/状态管理
+- 不要发明新模式，遵循项目现有风格
+- 不要在可复用组件中硬编码业务逻辑
+- 不要主动写测试（由 /test 触发）
+- 不要主动写文档（除非用户要求）
