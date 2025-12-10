@@ -20,45 +20,54 @@
 
 ## 管理脚本
 
+**调用方式：**
 ```bash
-# 路径
-python3 .claude/scripts/index.py <command>
+python3 .claude/scripts/index.py <command> <subcommand> [args]
 ```
+
+**使用场景：**
+
+| 场景 | 命令 |
+|-----|------|
+| 开发前查找可复用资产 | `python3 .claude/scripts/index.py project search <关键词>` |
+| 查看项目技术栈和配置 | `python3 .claude/scripts/index.py project info` |
+| 查看当前任务 | `python3 .claude/scripts/index.py task list` |
+| 开始一个任务 | `python3 .claude/scripts/index.py task start <id>` |
+| 完成任务并记录产出 | `python3 .claude/scripts/index.py task done <id> '<json>'` |
 
 ### Task 命令
 
 ```bash
 # 查看任务
-task list                    # 列出活跃任务
-task next                    # 下一个任务（含依赖产出）
-task show <id>               # 查看详情
+python3 .claude/scripts/index.py task list                    # 列出活跃任务
+python3 .claude/scripts/index.py task next                    # 下一个任务（含依赖产出）
+python3 .claude/scripts/index.py task show <id>               # 查看详情
 
 # 管理任务（JSON格式）
-task add '<json>'            # 添加任务
-task start <id>              # 开始任务
-task done <id> '<json>'      # 完成任务（自动同步到 project.json）
+python3 .claude/scripts/index.py task add '<json>'            # 添加任务
+python3 .claude/scripts/index.py task start <id>              # 开始任务
+python3 .claude/scripts/index.py task done <id> '<json>'      # 完成任务
 
 # 查看历史
-task history                 # 归档任务
-task history --search <keyword>
+python3 .claude/scripts/index.py task history                 # 归档任务
+python3 .claude/scripts/index.py task history --search <keyword>
 ```
 
 ### Project 命令
 
 ```bash
 # 查询
-project info                       # 项目概览
-project list [type]                # 列出资产 (models|apis|utils|components|all)
-project show <type> <name>         # 查看详情
-project search <keyword>           # 全局搜索
-project search --type <t> <kw>     # 按类型搜索
-project search --source <task_id>  # 按来源搜索
+python3 .claude/scripts/index.py project info                       # 项目概览
+python3 .claude/scripts/index.py project list [type]                # 列出资产
+python3 .claude/scripts/index.py project show <type> <name>         # 查看详情
+python3 .claude/scripts/index.py project search <keyword>           # 全局搜索
+python3 .claude/scripts/index.py project search --type <t> <kw>     # 按类型搜索
+python3 .claude/scripts/index.py project search --source <task_id>  # 按来源搜索
 
 # 管理
-project add <type> '<json>'        # 添加资产
-project update <type> '<json>'     # 更新资产
-project remove <type> <name>       # 删除资产
-project init '<json>'              # 初始化项目信息
+python3 .claude/scripts/index.py project add <type> '<json>'        # 添加资产
+python3 .claude/scripts/index.py project remove <type> <name>       # 删除资产
+python3 .claude/scripts/index.py project init '<json>'              # 初始化项目
 ```
 
 ### JSON 格式
