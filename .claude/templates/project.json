@@ -4,6 +4,27 @@
     "type": "web-app"
   },
 
+  "architecture": {
+    "layers": {
+      "presentation": ["React App", "REST API"],
+      "core": ["核心业务逻辑"],
+      "capabilities": ["能力模块"],
+      "storage": ["数据库"]
+    },
+    "modules": {
+      "ExampleModule": {
+        "status": "done|partial|in_progress|planned",
+        "deps": ["依赖的模块名"],
+        "features": ["功能1", "功能2"],
+        "index": {
+          "interface": "path/to/Interface.java",
+          "impl": "path/to/Impl.java",
+          "service": "path/to/Service.java"
+        }
+      }
+    }
+  },
+
   "stack": {
     "backend": "java/spring-boot/maven",
     "frontend": "typescript/react/vite",

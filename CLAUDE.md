@@ -11,63 +11,69 @@
 
 ## 命令
 
-| 命令 | 用途 |
-|-----|------|
+| 命令            | 用途                                         |
+| --------------- | -------------------------------------------- |
 | `/init-project` | 检测技术栈，填充 skills，初始化 project.json |
-| `/plan` | 聊完需求后，生成 design.md + 拆分任务 |
-| `/run` | 自动执行所有 active 任务 |
-| `/test` | 运行单元测试 |
+| `/fill-project` | 根据架构文档探索代码，填充 project.json 资产 |
+| `/plan`         | 聊完需求后，生成 design.md + 拆分任务        |
+| `/run`          | 自动执行所有 active 任务                     |
+| `/test`         | 运行单元测试                                 |
 
 ## 管理脚本
 
-**调用方式：**
 ```bash
-python3 .claude/scripts/index.py <command> <subcommand> [args]
+# 路径
+python3 .claude/scripts/index.py <command>
 ```
-
-**使用场景：**
-
-| 场景 | 命令 |
-|-----|------|
-| 开发前查找可复用资产 | `python3 .claude/scripts/index.py project search <关键词>` |
-| 查看项目技术栈和配置 | `python3 .claude/scripts/index.py project info` |
-| 查看当前任务 | `python3 .claude/scripts/index.py task list` |
-| 开始一个任务 | `python3 .claude/scripts/index.py task start <id>` |
-| 完成任务并记录产出 | `python3 .claude/scripts/index.py task done <id> '<json>'` |
 
 ### Task 命令
 
 ```bash
 # 查看任务
-python3 .claude/scripts/index.py task list                    # 列出活跃任务
-python3 .claude/scripts/index.py task next                    # 下一个任务（含依赖产出）
-python3 .claude/scripts/index.py task show <id>               # 查看详情
+task list                    # 列出活跃任务
+task next                    # 下一个任务（含依赖产出）
+task show <id>               # 查看详情
 
 # 管理任务（JSON格式）
-python3 .claude/scripts/index.py task add '<json>'            # 添加任务
-python3 .claude/scripts/index.py task start <id>              # 开始任务
-python3 .claude/scripts/index.py task done <id> '<json>'      # 完成任务
+task add '<json>'            # 添加任务
+task start <id>              # 开始任务
+task done <id> '<json>'      # 完成任务（自动同步到 project.json）
 
 # 查看历史
-python3 .claude/scripts/index.py task history                 # 归档任务
-python3 .claude/scripts/index.py task history --search <keyword>
+task history                 # 归档任务
+task history --search <keyword>
 ```
 
 ### Project 命令
 
 ```bash
 # 查询
-python3 .claude/scripts/index.py project info                       # 项目概览
-python3 .claude/scripts/index.py project list [type]                # 列出资产
-python3 .claude/scripts/index.py project show <type> <name>         # 查看详情
-python3 .claude/scripts/index.py project search <keyword>           # 全局搜索
-python3 .claude/scripts/index.py project search --type <t> <kw>     # 按类型搜索
-python3 .claude/scripts/index.py project search --source <task_id>  # 按来源搜索
+project info                       # 项目概览
+project list [type]                # 列出资产 (models|apis|utils|components|all)
+project show <type> <name>         # 查看详情
+project search <keyword>           # 全局搜索
+project search --type <t> <kw>     # 按类型搜索
+project search --source <task_id>  # 按来源搜索
 
 # 管理
-python3 .claude/scripts/index.py project add <type> '<json>'        # 添加资产
-python3 .claude/scripts/index.py project remove <type> <name>       # 删除资产
-python3 .claude/scripts/index.py project init '<json>'              # 初始化项目
+project add <type> '<json>'        # 添加资产
+project update <type> '<json>'     # 更新资产
+project remove <type> <name>       # 删除资产
+project init '<json>'              # 初始化项目信息
+```
+
+### Architecture 命令
+
+```bash
+# 查看
+project arch                       # 架构概览（层级 + 模块状态）
+project arch show <module>         # 模块详情
+
+# 管理
+project arch add '<json>'          # 添加模块
+project arch update '<json>'       # 更新模块
+project arch remove <module>       # 删除模块
+project arch layers '<json>'       # 更新层级定义
 ```
 
 ### JSON 格式
@@ -113,28 +119,42 @@ python3 .claude/scripts/index.py project init '<json>'              # 初始化�
 {"name": "MyApp", "type": "web-app", "stack": {"backend": "java/spring-boot"}}
 ```
 
+**Architecture 模块:**
+```json
+{
+  "name": "GameLoop",
+  "status": "done|partial|in_progress|planned",
+  "deps": ["依赖模块名"],
+  "features": ["功能1", "功能2"],
+  "index": {
+    "interface": "path/to/Interface.java",
+    "impl": "path/to/Impl.java"
+  }
+}
+```
+
 ## Task 四要素
 
 每个任务必须明确：
 
-| 字段 | 说明 |
-|-----|------|
-| **what** | 要做什么 |
-| **boundary** | 不做什么 |
+| 字段            | 说明     |
+| --------------- | -------- |
+| **what**        | 要做什么 |
+| **boundary**    | 不做什么 |
 | **constraints** | 约束条件 |
-| **done_when** | 完成标准 |
+| **done_when**   | 完成标准 |
 
 ## Output 四要素
 
 完成时必须记录（自动同步到 project.json）：
 
-| 字段 | 说明 |
-|-----|------|
-| **summary** | 一句话总结 |
-| **models** | 数据结构变更 |
-| **apis** | 接口变更 |
-| **utils** | 可复用方法 |
-| **components** | 前端组件 |
+| 字段           | 说明         |
+| -------------- | ------------ |
+| **summary**    | 一句话总结   |
+| **models**     | 数据结构变更 |
+| **apis**       | 接口变更     |
+| **utils**      | 可复用方法   |
+| **components** | 前端组件     |
 
 ## 文件结构
 
@@ -155,9 +175,9 @@ python3 .claude/scripts/index.py project init '<json>'              # 初始化�
 
 按需调用：
 
-| Skill | 何时使用 |
-|-------|---------|
-| `backend-dev` | 后端开发 |
-| `frontend-dev` | 前端开发 |
+| Skill                | 何时使用   |
+| -------------------- | ---------- |
+| `backend-dev`        | 后端开发   |
+| `frontend-dev`       | 前端开发   |
 | `database-migration` | 数据库变更 |
-| `prompt-template` | 提示词模板 |
+| `prompt-template`    | 提示词模板 |

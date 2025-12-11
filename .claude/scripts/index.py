@@ -24,6 +24,14 @@ Project 管理命令:
     project remove <type> <name>  删除资产
     project init '<json>'         初始化项目信息
 
+Architecture 命令:
+    project arch                  架构概览
+    project arch show <module>    模块详情
+    project arch add '<json>'     添加模块
+    project arch update '<json>'  更新模块
+    project arch remove <module>  删除模块
+    project arch layers '<json>'  更新层级定义
+
 JSON 格式示例:
 
 task add:
@@ -50,6 +58,26 @@ project add:
   api:   {"path": "/api/actors", "methods": ["GET", "POST"], "desc": "说明"}
   util:  {"name": "copyActor", "layer": "backend", "desc": "说明"}
   component: {"name": "ActorCard", "desc": "说明"}
+
+project arch add/update:
+{
+  "name": "GameLoop",
+  "status": "done",
+  "deps": [],
+  "features": ["回合制游戏循环", "双输入模式"],
+  "index": {
+    "interface": "core/.../GameLoop.java",
+    "impl": "core/.../TurnBasedGameLoop.java"
+  }
+}
+
+project arch layers:
+{
+  "presentation": ["React App", "REST API"],
+  "core": ["GameTemplate", "Game", "Modules"],
+  "capabilities": ["LLM模块", "公式引擎"],
+  "storage": ["SQLite"]
+}
 
 示例:
     python3 index.py task add '{"name": "Actor CRUD", "what": "实现基础CRUD"}'
@@ -647,6 +675,32 @@ def cmd_project_info():
             print(f"  {key}: {val}")
         print("")
 
+    # 架构概览
+    arch = data.get('architecture', {})
+    if arch:
+        modules = arch.get('modules', {})
+        if modules:
+            # 统计各状态数量
+            status_count = {'done': 0, 'partial': 0, 'in_progress': 0, 'planned': 0}
+            for info in modules.values():
+                status = info.get('status', 'planned')
+                if status in status_count:
+                    status_count[status] += 1
+
+            status_str = []
+            if status_count['done']:
+                status_str.append(f"✅{status_count['done']}")
+            if status_count['partial']:
+                status_str.append(f"🔶{status_count['partial']}")
+            if status_count['in_progress']:
+                status_str.append(f"🔄{status_count['in_progress']}")
+            if status_count['planned']:
+                status_str.append(f"⏳{status_count['planned']}")
+
+            print(f"架构模块: {' '.join(status_str)} (共 {len(modules)} 个)")
+            print("  使用 project arch 查看详情")
+            print("")
+
     # 资产统计
     counts = []
     for asset_type in ASSET_TYPES:
@@ -896,6 +950,234 @@ def cmd_project_init(json_str):
     cmd_project_info()
 
 
+# ============ Architecture 命令实现 ============
+
+MODULE_STATUS = ['done', 'partial', 'in_progress', 'planned']
+
+
+def cmd_arch_overview():
+    """显示架构概览"""
+    data = load_project()
+    arch = data.get('architecture', {})
+
+    if not arch:
+        print("架构信息未配置")
+        print("使用 project arch layers '<json>' 配置层级")
+        print("使用 project arch add '<json>' 添加模块")
+        return
+
+    print("=== 架构概览 ===\n")
+
+    # 显示层级
+    layers = arch.get('layers', {})
+    if layers:
+        print("层级结构:")
+        layer_order = ['presentation', 'core', 'capabilities', 'storage']
+        for layer in layer_order:
+            if layer in layers:
+                components = ', '.join(layers[layer])
+                print(f"  [{layer}] {components}")
+        print("")
+
+    # 显示模块
+    modules = arch.get('modules', {})
+    if modules:
+        print("模块状态:")
+
+        # 按状态分组
+        by_status = {'done': [], 'partial': [], 'in_progress': [], 'planned': []}
+        for name, info in modules.items():
+            status = info.get('status', 'planned')
+            if status in by_status:
+                by_status[status].append((name, info))
+
+        status_icons = {'done': '✅', 'partial': '🔶', 'in_progress': '🔄', 'planned': '⏳'}
+        status_labels = {'done': '已完成', 'partial': '部分完成', 'in_progress': '进行中', 'planned': '计划中'}
+
+        for status in ['in_progress', 'partial', 'done', 'planned']:
+            items = by_status[status]
+            if items:
+                print(f"\n  {status_icons[status]} {status_labels[status]}:")
+                for name, info in items:
+                    deps = info.get('deps', [])
+                    dep_str = f" (依赖: {', '.join(deps)})" if deps else ""
+                    features = info.get('features', [])
+                    feat_str = f" - {', '.join(features[:2])}" if features else ""
+                    if len(features) > 2:
+                        feat_str += "..."
+                    print(f"    • {name}{dep_str}{feat_str}")
+
+        print(f"\n共 {len(modules)} 个模块")
+    else:
+        print("暂无模块配置")
+        print("使用 project arch add '<json>' 添加模块")
+
+
+def cmd_arch_show(module_name):
+    """显示模块详情"""
+    data = load_project()
+    arch = data.get('architecture', {})
+    modules = arch.get('modules', {})
+
+    if module_name not in modules:
+        print(f"错误: 模块 '{module_name}' 不存在")
+        return
+
+    info = modules[module_name]
+
+    print(f"=== {module_name} ===\n")
+
+    status_icons = {'done': '✅', 'partial': '🔶', 'in_progress': '🔄', 'planned': '⏳'}
+    status = info.get('status', 'planned')
+    print(f"状态: {status_icons.get(status, '?')} {status}")
+
+    deps = info.get('deps', [])
+    if deps:
+        print(f"依赖: {', '.join(deps)}")
+
+    features = info.get('features', [])
+    if features:
+        print(f"\n功能:")
+        for f in features:
+            print(f"  • {f}")
+
+    index = info.get('index', {})
+    if index:
+        print(f"\n入口文件:")
+        for key, path in index.items():
+            print(f"  {key}: {path}")
+
+
+def cmd_arch_add(json_str):
+    """添加模块"""
+    try:
+        module_data = json.loads(json_str)
+    except json.JSONDecodeError as e:
+        print(f"错误: JSON 解析失败 - {e}")
+        return False
+
+    name = module_data.get('name')
+    if not name:
+        print("错误: 缺少 'name' 字段")
+        return False
+
+    data = load_project()
+
+    if 'architecture' not in data:
+        data['architecture'] = {'layers': {}, 'modules': {}}
+    if 'modules' not in data['architecture']:
+        data['architecture']['modules'] = {}
+
+    # 检查是否已存在
+    if name in data['architecture']['modules']:
+        print(f"错误: 模块 '{name}' 已存在，使用 update 命令更新")
+        return False
+
+    # 构建模块信息
+    info = {
+        'status': module_data.get('status', 'planned'),
+        'deps': module_data.get('deps', []),
+        'features': module_data.get('features', []),
+        'index': module_data.get('index', {})
+    }
+
+    # 验证状态
+    if info['status'] not in MODULE_STATUS:
+        print(f"警告: 状态 '{info['status']}' 无效，使用 'planned'")
+        info['status'] = 'planned'
+
+    data['architecture']['modules'][name] = info
+    save_project(data)
+
+    print(f"✅ 已添加模块: {name}")
+    return True
+
+
+def cmd_arch_update(json_str):
+    """更新模块"""
+    try:
+        module_data = json.loads(json_str)
+    except json.JSONDecodeError as e:
+        print(f"错误: JSON 解析失败 - {e}")
+        return False
+
+    name = module_data.get('name')
+    if not name:
+        print("错误: 缺少 'name' 字段")
+        return False
+
+    data = load_project()
+
+    if 'architecture' not in data or 'modules' not in data['architecture']:
+        print(f"错误: 模块 '{name}' 不存在")
+        return False
+
+    if name not in data['architecture']['modules']:
+        print(f"错误: 模块 '{name}' 不存在，使用 add 命令添加")
+        return False
+
+    # 更新字段
+    info = data['architecture']['modules'][name]
+
+    if 'status' in module_data:
+        if module_data['status'] in MODULE_STATUS:
+            info['status'] = module_data['status']
+        else:
+            print(f"警告: 状态 '{module_data['status']}' 无效，保持原值")
+
+    if 'deps' in module_data:
+        info['deps'] = module_data['deps']
+
+    if 'features' in module_data:
+        info['features'] = module_data['features']
+
+    if 'index' in module_data:
+        info['index'].update(module_data['index'])
+
+    save_project(data)
+    print(f"✅ 已更新模块: {name}")
+    return True
+
+
+def cmd_arch_remove(module_name):
+    """删除模块"""
+    data = load_project()
+
+    if 'architecture' not in data or 'modules' not in data['architecture']:
+        print(f"错误: 模块 '{module_name}' 不存在")
+        return False
+
+    if module_name not in data['architecture']['modules']:
+        print(f"错误: 模块 '{module_name}' 不存在")
+        return False
+
+    del data['architecture']['modules'][module_name]
+    save_project(data)
+
+    print(f"✅ 已删除模块: {module_name}")
+    return True
+
+
+def cmd_arch_layers(json_str):
+    """更新层级定义"""
+    try:
+        layers_data = json.loads(json_str)
+    except json.JSONDecodeError as e:
+        print(f"错误: JSON 解析失败 - {e}")
+        return False
+
+    data = load_project()
+
+    if 'architecture' not in data:
+        data['architecture'] = {'layers': {}, 'modules': {}}
+
+    data['architecture']['layers'] = layers_data
+    save_project(data)
+
+    print("✅ 层级定义已更新")
+    return True
+
+
 def main():
     args = sys.argv[1:]
 
@@ -1042,6 +1324,48 @@ def main():
                 print('示例: index.py project init \'{"name": "MyApp", "type": "web-app"}\'')
                 return
             cmd_project_init(args[2])
+
+        elif subcmd == 'arch':
+            if len(args) < 3:
+                # 无参数显示概览
+                cmd_arch_overview()
+                return
+
+            arch_cmd = args[2]
+
+            if arch_cmd == 'show':
+                if len(args) < 4:
+                    print("用法: index.py project arch show <module>")
+                    return
+                cmd_arch_show(args[3])
+
+            elif arch_cmd == 'add':
+                if len(args) < 4:
+                    print("用法: index.py project arch add '<json>'")
+                    return
+                cmd_arch_add(args[3])
+
+            elif arch_cmd == 'update':
+                if len(args) < 4:
+                    print("用法: index.py project arch update '<json>'")
+                    return
+                cmd_arch_update(args[3])
+
+            elif arch_cmd == 'remove':
+                if len(args) < 4:
+                    print("用法: index.py project arch remove <module>")
+                    return
+                cmd_arch_remove(args[3])
+
+            elif arch_cmd == 'layers':
+                if len(args) < 4:
+                    print("用法: index.py project arch layers '<json>'")
+                    return
+                cmd_arch_layers(args[3])
+
+            else:
+                print(f"未知架构命令: {arch_cmd}")
+                print("可用: show, add, update, remove, layers")
 
         else:
             print(f"未知子命令: {subcmd}")
